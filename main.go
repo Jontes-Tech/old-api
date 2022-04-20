@@ -8,9 +8,13 @@ import (
 )
 
 func archLinux(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	rackspaceurl := getLatestArchLinux("rackspace")
 	fmt.Fprint(w, rackspaceurl)
 	fmt.Println("Endpoint Hit: Arch Linux Rackspace")
+}
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "jontes.page")
 }
 func handleRequests() {
 	http.HandleFunc("/api/arch-rackspace-latest", archLinux)
