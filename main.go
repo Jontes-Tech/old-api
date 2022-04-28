@@ -10,6 +10,7 @@ import (
 )
 // Gets URL parameter, then returns the latest Arch Linux release URL usiong the getLatestArchLinux function.
 func archLinux(w http.ResponseWriter, req *http.Request) {
+	setupCorsResponse(&w, req)
 	mirrors, ok := req.URL.Query()["mirror"]
     if !ok || len(mirrors[0]) < 1 {
         fmt.Fprint(w, "URL parameter 'mirror' is missing")
@@ -24,6 +25,12 @@ func handleRequests() {
 	http.HandleFunc("/api/arch", archLinux)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
+
+func setupCorsResponse(w *http.ResponseWriter, req *http.Request) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length")
+ }
 
 // Main Function for getting the latest Arch Linux release URL. 
 func getLatestArchLinux(mirror string) string {
