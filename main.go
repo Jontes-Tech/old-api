@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 // Gets URL parameter, then returns the latest Arch Linux release URL usiong the getLatestArchLinux function.
 func archLinux(w http.ResponseWriter, req *http.Request) {
@@ -18,7 +19,7 @@ func archLinux(w http.ResponseWriter, req *http.Request) {
     }
     mirror := mirrors[0]
 	rackspaceurl := getLatestArchLinux(string(mirror))
-	fmt.Fprint(w, rackspaceurl)
+	fmt.Fprint(w, strings.ReplaceAll(rackspaceurl, "\n", ""))
 }
 // Handles all requests to the server.
 func handleRequests() {
