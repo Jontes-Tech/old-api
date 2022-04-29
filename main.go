@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
+	// "github.com/go-rod/rod"
 )
 // Gets URL parameter, then returns the latest Arch Linux release URL usiong the getLatestArchLinux function.
 func archLinux(w http.ResponseWriter, req *http.Request) {
@@ -21,9 +23,20 @@ func archLinux(w http.ResponseWriter, req *http.Request) {
 	rackspaceurl := getLatestArchLinux(string(mirror))
 	fmt.Fprint(w, strings.ReplaceAll(rackspaceurl, "\n", ""))
 }
-// Handles all requests to the server.
+func redirect(w http.ResponseWriter, req *http.Request) {
+	setupCorsResponse(&w, req)
+	mirrors, ok := req.URL.Query()["mirror"]
+    if !ok || len(mirrors[0]) < 1 {
+        fmt.Fprint(w, "URL parameter 'mirror' is missing")
+        return
+    }
+    mirror := mirrors[0]
+	rackspaceurl := getLatestArchLinux(string(mirror))
+    http.Redirect(w, req, rackspaceurl, 302)
+}
 func handleRequests() {
 	http.HandleFunc("/api/arch", archLinux)
+	http.HandleFunc("/api/arch/redirect", redirect)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
