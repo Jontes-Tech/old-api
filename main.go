@@ -8,8 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"os"
-	"os/exec"
 )
 // Gets URL parameter, then returns the latest Arch Linux release URL usiong the getLatestArchLinux function.
 func archLinux(w http.ResponseWriter, req *http.Request) {
@@ -23,22 +21,8 @@ func archLinux(w http.ResponseWriter, req *http.Request) {
 	rackspaceurl := getLatestArchLinux(string(mirror))
 	fmt.Fprint(w, strings.ReplaceAll(rackspaceurl, "\n", ""))
 }
-func gitPull(w http.ResponseWriter, req *http.Request) {
-	keys, ok := req.URL.Query()["key"]
-	key := keys[0]
-    if !ok || len(keys[0]) < 1 {
-        fmt.Fprint(w, "URL parameter 'key' is missing")
-        return
-    } else if key == os.Getenv("jontesapimainkey") {
-		exec.Command("bash", "/home/jonte/website/torpull.sh").Run()
-		fmt.Fprint(w, "Key Provided - Access Accepted. - Command Ran.")
-	} else {
-		fmt.Fprint(w, "Key Provided - Access Denied. - Command Not Ran.")
-	}
-}
 func handleRequests() {
 	http.HandleFunc("/api/arch", archLinux)
-	http.HandleFunc("/torpull", gitPull)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 func setupCorsResponse(w *http.ResponseWriter, req *http.Request) {
