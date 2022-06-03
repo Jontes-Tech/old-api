@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"os"
 )
 // Gets URL parameter, then returns the latest Arch Linux release URL usiong the getLatestArchLinux function.
 func archLinux(w http.ResponseWriter, req *http.Request) {
@@ -23,6 +24,7 @@ func archLinux(w http.ResponseWriter, req *http.Request) {
 }
 func handleRequests() {
 	http.HandleFunc("/api/arch", archLinux)
+	http.HandleFunc("/short-soc", searchofchoiceShorturl)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 func setupCorsResponse(w *http.ResponseWriter, req *http.Request) {
@@ -51,6 +53,23 @@ func getLatestArchLinux(mirror string) string {
 	}
 	fmt.Println("Mirror " + mirror + " requested.")
 	return outurl
+}
+func searchofchoiceShorturl(w http.ResponseWriter, req *http.Request) {
+	setupCorsResponse(&w, req)
+	query, ok := req.URL.Query()["q"]
+    if !ok || len(query[0]) < 1 {
+        fmt.Fprint(w, "URL parameter 'query' is missing")
+        return
+    }
+	resp, err := http.Get("https://soc.jontes.page/rest/v2/short-urls/shorten?apiKey="+os.Getenv("SOCAPIKEY")+"&longUrl=https%3A%2F%2Fsearchofchoice.jontes.page%2F%3Fq%3D"+query[0]+"&format=txt")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Fprint(w, string(body))
 }
 // Main Function - Used for printing friendly messages to the server console.
 func main() {
